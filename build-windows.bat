@@ -47,9 +47,9 @@ if not exist "dist" mkdir dist
 
 REM Set classpath for EJB compilation (Jakarta EE for WildFly 38)
 set EJB_CP=.
-set EJB_CP=%EJB_CP%;%WILDFLY_HOME%\modules\system\layers\base\jakarta\ejb\api\main\*.jar
-set EJB_CP=%EJB_CP%;%WILDFLY_HOME%\modules\system\layers\base\jakarta\servlet\api\main\*.jar
-set EJB_CP=%EJB_CP%;%WILDFLY_HOME%\modules\system\layers\base\jakarta\annotation\api\main\*.jar
+set EJB_CP=%EJB_CP%;%WILDFLY_HOME%\modules\system\layers\base\jakarta\ejb\api\main\jakarta.ejb-api-4.0.1.jar
+set EJB_CP=%EJB_CP%;%WILDFLY_HOME%\modules\system\layers\base\jakarta\servlet\api\main\jakarta.servlet-api-6.0.0.jar
+set EJB_CP=%EJB_CP%;%WILDFLY_HOME%\modules\system\layers\base\jakarta\annotation\api\main\jakarta.annotation-api-2.1.1.jar
 
 echo [4/5] Compiling EJB module...
 javac -source 1.8 -target 1.8 -cp "%EJB_CP%" -d build\ejb-classes ejb-module\src\model\*.java ejb-module\src\dao\*.java ejb-module\src\ejb\*.java
@@ -64,7 +64,7 @@ echo.
 REM Set classpath for Web compilation
 set WEB_CP=%EJB_CP%
 set WEB_CP=%WEB_CP%;build\ejb-classes
-set WEB_CP=%WEB_CP%;%WILDFLY_HOME%\modules\system\layers\base\jakarta\servlet\jsp\api\main\*.jar
+set WEB_CP=%WEB_CP%;%WILDFLY_HOME%\modules\system\layers\base\jakarta\servlet\jsp\api\main\jakarta.servlet.jsp-api-3.1.1.jar
 
 echo [5/5] Compiling Web module...
 javac -source 1.8 -target 1.8 -cp "%WEB_CP%" -d build\web-classes web-module\src\controller\*.java
