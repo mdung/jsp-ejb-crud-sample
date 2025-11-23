@@ -1,0 +1,4 @@
+connect
+/subsystem=datasources/data-source=ExampleDS:add(jndi-name=java:jboss/datasources/ExampleDS,driver-name=postgresql,connection-url=jdbc:postgresql://localhost:5432/employee_db,user-name=postgres,password=postgres,enabled=true)
+/subsystem=datasources/data-source=ExampleDS:enable
+quit

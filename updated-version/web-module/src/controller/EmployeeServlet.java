@@ -21,9 +21,9 @@ import javax.naming.NamingException;
 public class EmployeeServlet extends HttpServlet {
     
     private static final long serialVersionUID = 1L;
-    
-    private static final String JNDI_NAME = "java:global/employee-demo/ejb-module/EmployeeServiceBean!ejb.EmployeeService";
-    
+
+    private static final String JNDI_NAME ="java:module/EmployeeServiceBean!ejb.EmployeeService";
+
     private EmployeeService getEmployeeService() throws NamingException {
         InitialContext ctx = new InitialContext();
         return (EmployeeService) ctx.lookup(JNDI_NAME);

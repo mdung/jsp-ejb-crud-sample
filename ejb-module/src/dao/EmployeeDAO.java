@@ -13,12 +13,14 @@ import javax.naming.NamingException;
  * Uses plain JDBC (Java 6 compatible)
  */
 public class EmployeeDAO {
-    
+
     private static final String JNDI_NAME = "java:jboss/datasources/EmployeeDS";
-    
+
+
     private DataSource getDataSource() throws NamingException {
         InitialContext ctx = new InitialContext();
-        return (DataSource) ctx.lookup(JNDI_NAME);
+        Object obj = ctx.lookup(JNDI_NAME);
+        return (DataSource) obj;
     }
     
     /**
