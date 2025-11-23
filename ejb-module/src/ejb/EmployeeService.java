@@ -2,7 +2,7 @@ package ejb;
 
 import model.Employee;
 import java.util.List;
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 /**
  * Remote Interface for Employee Service EJB

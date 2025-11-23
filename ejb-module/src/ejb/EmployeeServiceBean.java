@@ -3,7 +3,7 @@ package ejb;
 import model.Employee;
 import dao.EmployeeDAO;
 import java.util.List;
-import javax.ejb.Stateless;
+import jakarta.ejb.Stateless;
 
 /**
  * Stateless Session Bean Implementation
