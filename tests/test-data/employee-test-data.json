@@ -1,0 +1,71 @@
+{
+  "validEmployees": [
+    {
+      "name": "John Doe",
+      "email": "john.doe@test.com",
+      "department": "IT"
+    },
+    {
+      "name": "Jane Smith",
+      "email": "jane.smith@test.com",
+      "department": "HR"
+    },
+    {
+      "name": "Bob Johnson",
+      "email": "bob.johnson@test.com",
+      "department": "Finance"
+    },
+    {
+      "name": "Alice Williams",
+      "email": "alice.williams@test.com",
+      "department": "Marketing"
+    },
+    {
+      "name": "Charlie Brown",
+      "email": "charlie.brown@test.com",
+      "department": "Operations"
+    }
+  ],
+  "invalidEmployees": [
+    {
+      "name": "",
+      "email": "test@test.com",
+      "department": "IT",
+      "expectedError": "Employee name is required"
+    },
+    {
+      "name": "Test User",
+      "email": "",
+      "department": "IT",
+      "expectedError": "Employee email is required"
+    },
+    {
+      "name": "Test User",
+      "email": "test@test.com",
+      "department": "",
+      "expectedError": "Employee department is required"
+    },
+    {
+      "name": "Test User",
+      "email": "invalid-email",
+      "department": "IT",
+      "expectedError": "Invalid email format"
+    },
+    {
+      "name": "Test User",
+      "email": "test@test.com",
+      "department": "IT",
+      "duplicateEmail": true,
+      "expectedError": "Email already exists"
+    }
+  ],
+  "updateScenarios": [
+    {
+      "id": 1,
+      "name": "Updated Name",
+      "email": "original@test.com",
+      "department": "Updated Department"
+    }
+  ]
+}
+
