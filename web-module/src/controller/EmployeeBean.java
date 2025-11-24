@@ -516,6 +516,39 @@ public class EmployeeBean {
         }
     }
     
+    /**
+     * Toggle employee active status (activate if inactive, deactivate if active)
+     */
+    public String toggleEmployeeStatus() {
+        Long id = getEmployeeIdFromRequest();
+        if (id == null) {
+            addErrorMessage("Employee ID is required");
+            return null;
+        }
+        try {
+            Employee emp = getEmployeeService().getEmployeeById(id);
+            if (emp == null) {
+                addErrorMessage("Employee not found");
+                return null;
+            }
+            
+            if (emp.getActive()) {
+                getEmployeeService().deactivateEmployee(id);
+                addSuccessMessage("Employee deactivated successfully");
+            } else {
+                getEmployeeService().activateEmployee(id);
+                addSuccessMessage("Employee activated successfully");
+            }
+            
+            employees = null; // Force reload
+            loadEmployees(); // Reload to refresh the list
+            return null; // Stay on same page
+        } catch (Exception e) {
+            addErrorMessage("Error toggling employee status: " + e.getMessage());
+            return null;
+        }
+    }
+    
     // Helper methods for messages
     private void addSuccessMessage(String msg) {
         FacesContext.getCurrentInstance().addMessage(null, 

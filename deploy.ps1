@@ -19,11 +19,13 @@ $failed = Test-Path "C:\wildfly-38.0.1.Final\standalone\deployments\employee-dem
 if ($deployed) {
     Write-Host "`n✅ DEPLOYMENT SUCCESSFUL!" -ForegroundColor Green
     Write-Host "`nAccess the application at:" -ForegroundColor Cyan
-    Write-Host "http://localhost:8080/employee-demo/employee?action=list" -ForegroundColor Yellow
+    Write-Host "JSF Application:" -ForegroundColor Yellow
+    Write-Host "  - Employee List: http://localhost:8080/employee-demo/employee-list.xhtml" -ForegroundColor Yellow
+    Write-Host "  - Home: http://localhost:8080/employee-demo/index.xhtml" -ForegroundColor Yellow
     
     # Test the application
     try {
-        $response = Invoke-WebRequest -Uri "http://localhost:8080/employee-demo/employee?action=list" -UseBasicParsing -TimeoutSec 5
+        $response = Invoke-WebRequest -Uri "http://localhost:8080/employee-demo/employee-list.xhtml" -UseBasicParsing -TimeoutSec 5
         Write-Host "`n✅ Application is responding! (HTTP $($response.StatusCode))" -ForegroundColor Green
     } catch {
         Write-Host "`n⚠️  Application deployed but not responding yet. Wait a few seconds and try again." -ForegroundColor Yellow

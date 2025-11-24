@@ -194,7 +194,7 @@
                         <h:outputText value="#{employee.active ? 'Active' : 'Inactive'}" 
                                      style="color: #{employee.active ? 'green' : 'red'}; font-weight: bold; margin-right: 10px;"/>
                         <h:commandLink value="#{employee.active ? 'Deactivate' : 'Activate'}" 
-                                      action="#{employee.active ? employeeBean.deactivateEmployee : employeeBean.activateEmployee}"
+                                      action="#{employeeBean.toggleEmployeeStatus}"
                                       styleClass="btn #{employee.active ? 'btn-delete' : 'btn-primary'}"
                                       style="font-size: 12px; padding: 4px 8px;">
                             <f:param name="id" value="#{employee.id}"/>

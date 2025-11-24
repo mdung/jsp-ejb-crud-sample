@@ -122,7 +122,7 @@
                         <f:param name="id" value="#{employeeBean.employeeId}"/>
                     </h:commandLink>
                     <h:commandLink value="#{employeeBean.employee.active ? 'Deactivate' : 'Activate'}" 
-                                   action="#{employeeBean.employee.active ? employeeBean.deactivateEmployee : employeeBean.activateEmployee}"
+                                   action="#{employeeBean.toggleEmployeeStatus}"
                                    styleClass="btn"
                                    style="background-color: #{employeeBean.employee.active ? '#ff9800' : '#4CAF50'}; color: white;"
                                    onclick="return confirm('Are you sure you want to #{employeeBean.employee.active ? 'deactivate' : 'activate'} this employee?')">
