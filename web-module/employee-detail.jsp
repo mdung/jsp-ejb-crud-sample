@@ -84,6 +84,18 @@
                 <div class="detail-value">${employee.department}</div>
             </div>
             
+            <div class="detail-group">
+                <div class="detail-label">Performance Management</div>
+                <div class="detail-value">
+                    <a href="employee?action=performanceHistory&id=${employee.id}" 
+                       class="btn btn-edit" 
+                       style="background-color: #9c27b0; margin-right: 10px;">View Performance History</a>
+                    <a href="employee?action=performance&id=${employee.id}" 
+                       class="btn btn-edit" 
+                       style="background-color: #4CAF50;">Add/Update Performance</a>
+                </div>
+            </div>
+            
             <div>
                 <a href="employee?action=edit&id=${employee.id}" class="btn btn-edit">Edit</a>
                 <a href="employee?action=list" class="btn btn-back">Back to List</a>

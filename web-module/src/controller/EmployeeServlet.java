@@ -2,8 +2,10 @@ package controller;
 
 import ejb.EmployeeService;
 import model.Employee;
+import model.EmployeePerformance;
 import java.io.IOException;
 import java.util.List;
+import java.math.BigDecimal;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -48,6 +50,10 @@ public class EmployeeServlet extends HttpServlet {
                 deleteEmployee(request, response, service);
             } else if ("view".equals(action)) {
                 viewEmployee(request, response, service);
+            } else if ("performance".equals(action)) {
+                showPerformanceForm(request, response, service);
+            } else if ("performanceHistory".equals(action)) {
+                viewPerformanceHistory(request, response, service);
             } else {
                 listEmployees(request, response, service);
             }
@@ -72,6 +78,8 @@ public class EmployeeServlet extends HttpServlet {
                 createEmployee(request, response, service);
             } else if ("update".equals(action)) {
                 updateEmployee(request, response, service);
+            } else if ("updatePerformance".equals(action)) {
+                updatePerformance(request, response, service);
             } else {
                 listEmployees(request, response, service);
             }
@@ -164,6 +172,71 @@ public class EmployeeServlet extends HttpServlet {
         Long id = Long.parseLong(request.getParameter("id"));
         service.deleteEmployee(id);
         response.sendRedirect("employee?action=list&message=Employee deleted successfully");
+    }
+    
+    private void showPerformanceForm(HttpServletRequest request, HttpServletResponse response, EmployeeService service)
+            throws Exception, ServletException, IOException {
+        Long employeeId = Long.parseLong(request.getParameter("id"));
+        Employee employee = service.getEmployeeById(employeeId);
+        if (employee == null) {
+            throw new Exception("Employee not found with ID: " + employeeId);
+        }
+        
+        String month = request.getParameter("month");
+        EmployeePerformance performance = null;
+        if (month != null && !month.trim().isEmpty()) {
+            performance = service.getEmployeePerformance(employeeId, month);
+        }
+        
+        request.setAttribute("employee", employee);
+        request.setAttribute("performance", performance);
+        request.setAttribute("month", month);
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/employee-performance-form.jsp");
+        dispatcher.forward(request, response);
+    }
+    
+    private void viewPerformanceHistory(HttpServletRequest request, HttpServletResponse response, EmployeeService service)
+            throws Exception, ServletException, IOException {
+        Long employeeId = Long.parseLong(request.getParameter("id"));
+        Employee employee = service.getEmployeeById(employeeId);
+        if (employee == null) {
+            throw new Exception("Employee not found with ID: " + employeeId);
+        }
+        
+        List<EmployeePerformance> performances = service.getEmployeePerformanceHistory(employeeId);
+        request.setAttribute("employee", employee);
+        request.setAttribute("performances", performances);
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/employee-performance-history.jsp");
+        dispatcher.forward(request, response);
+    }
+    
+    private void updatePerformance(HttpServletRequest request, HttpServletResponse response, EmployeeService service)
+            throws Exception, IOException {
+        Long employeeId = Long.parseLong(request.getParameter("employeeId"));
+        String month = request.getParameter("month");
+        String scoreStr = request.getParameter("performanceScore");
+        String rating = request.getParameter("rating");
+        String notes = request.getParameter("notes");
+        
+        BigDecimal performanceScore = null;
+        if (scoreStr != null && !scoreStr.trim().isEmpty()) {
+            try {
+                performanceScore = new BigDecimal(scoreStr);
+            } catch (NumberFormatException e) {
+                response.sendRedirect("employee?action=performance&id=" + employeeId + 
+                    "&month=" + month + "&error=Invalid performance score");
+                return;
+            }
+        }
+        
+        try {
+            service.saveEmployeePerformance(employeeId, month, performanceScore, rating, notes);
+            response.sendRedirect("employee?action=view&id=" + employeeId + 
+                "&message=Performance updated successfully");
+        } catch (Exception e) {
+            response.sendRedirect("employee?action=performance&id=" + employeeId + 
+                "&month=" + month + "&error=" + e.getMessage());
+        }
     }
     
     private void handleError(HttpServletRequest request, HttpServletResponse response, Exception e)

@@ -359,6 +359,231 @@
 
 ---
 
+---
+
+## Test Case 16: Create Employee Performance - Valid Data
+
+**Test Case ID:** TC_PERF_001  
+**Priority:** High  
+**Type:** Functional
+
+**Preconditions:**
+- Employee with ID 1 exists
+- User is on employee detail page
+
+**Test Steps:**
+1. Navigate to employee detail page for employee ID 1
+2. Click "Add/Update Performance" button
+3. Enter valid performance data:
+   - Month: "2025-11"
+   - Performance Score: 85.5
+   - Rating: "Good"
+   - Notes: "Good performance this month"
+4. Click "Save Performance" button
+
+**Expected Result:**
+- Performance record is created successfully
+- Success message is displayed
+- Redirected to employee detail page
+- Performance can be viewed in performance history
+
+---
+
+## Test Case 17: Create Employee Performance - Invalid Score Range
+
+**Test Case ID:** TC_PERF_002  
+**Priority:** High  
+**Type:** Validation
+
+**Preconditions:**
+- Employee with ID 1 exists
+
+**Test Steps:**
+1. Navigate to performance form for employee ID 1
+2. Enter data:
+   - Month: "2025-11"
+   - Performance Score: 150 (exceeds 100)
+   - Rating: "Excellent"
+3. Click "Save Performance" button
+
+**Expected Result:**
+- Error message: "Performance score must be between 0 and 100"
+- Performance is NOT saved
+- Form remains populated
+
+**Alternative Test:**
+- Enter negative score: -10
+- Same error expected
+
+---
+
+## Test Case 18: Create Employee Performance - Invalid Month Format
+
+**Test Case ID:** TC_PERF_003  
+**Priority:** Medium  
+**Type:** Validation
+
+**Test Steps:**
+1. Navigate to performance form
+2. Enter data:
+   - Month: "2025/11" (invalid format)
+   - Performance Score: 80
+   - Rating: "Good"
+3. Click "Save Performance" button
+
+**Expected Result:**
+- HTML5 validation prevents submission (pattern validation)
+- OR error message: "Invalid month format. Must be YYYY-MM (e.g., 2025-11)"
+- Form is not submitted
+
+---
+
+## Test Case 19: Create Employee Performance - Missing Required Fields
+
+**Test Case ID:** TC_PERF_004  
+**Priority:** High  
+**Type:** Validation
+
+**Test Steps:**
+1. Navigate to performance form
+2. Leave Month field empty
+3. Enter score and rating
+4. Click "Save Performance" button
+
+**Expected Result:**
+- HTML5 validation prevents submission
+- OR error message: "Month is required"
+
+**Alternative Tests:**
+- Leave Performance Score empty → Error: "Performance score is required"
+- Leave Rating empty → Error: "Rating is required"
+
+---
+
+## Test Case 20: Update Existing Performance Record
+
+**Test Case ID:** TC_PERF_005  
+**Priority:** High  
+**Type:** Functional
+
+**Preconditions:**
+- Performance record exists for employee ID 1, month "2025-11"
+
+**Test Steps:**
+1. Navigate to performance form for employee ID 1, month "2025-11"
+2. Update performance score from 80 to 90
+3. Change rating from "Good" to "Excellent"
+4. Update notes
+5. Click "Save Performance" button
+
+**Expected Result:**
+- Existing performance record is updated (not duplicated)
+- Success message displayed
+- Updated data is saved correctly
+- Only one record exists for that month
+
+---
+
+## Test Case 21: View Performance History
+
+**Test Case ID:** TC_PERF_006  
+**Priority:** Medium  
+**Type:** Functional
+
+**Preconditions:**
+- Employee with ID 1 exists
+- Multiple performance records exist for employee ID 1
+
+**Test Steps:**
+1. Navigate to employee detail page for employee ID 1
+2. Click "View Performance History" button
+
+**Expected Result:**
+- Performance history page is displayed
+- All performance records are shown in a table
+- Records are sorted by month (newest first)
+- Table shows: Month, Performance Score, Rating, Notes, Created At
+- "Add New Performance" button is visible
+
+---
+
+## Test Case 22: View Performance History - No Records
+
+**Test Case ID:** TC_PERF_007  
+**Priority:** Low  
+**Type:** Functional
+
+**Preconditions:**
+- Employee with ID 1 exists
+- No performance records exist for employee ID 1
+
+**Test Steps:**
+1. Navigate to performance history for employee ID 1
+
+**Expected Result:**
+- Message displayed: "No performance records found."
+- Table structure is visible
+- "Add New Performance" button is available
+
+---
+
+## Test Case 23: Performance Rating Validation
+
+**Test Case ID:** TC_PERF_008  
+**Priority:** Medium  
+**Type:** Validation
+
+**Test Steps:**
+1. Navigate to performance form
+2. Enter valid month and score
+3. Select invalid rating (if possible via direct form manipulation)
+4. Submit form
+
+**Expected Result:**
+- Only valid ratings are selectable: Excellent, Good, Average, Poor
+- OR error message: "Invalid rating. Must be: Excellent, Good, Average, or Poor"
+
+---
+
+## Test Case 24: Multiple Performance Records for Different Months
+
+**Test Case ID:** TC_PERF_009  
+**Priority:** Medium  
+**Type:** Functional
+
+**Preconditions:**
+- Employee with ID 1 exists
+
+**Test Steps:**
+1. Create performance record for month "2025-10"
+2. Create performance record for month "2025-11"
+3. Create performance record for month "2025-12"
+4. View performance history
+
+**Expected Result:**
+- All three records are displayed
+- Each record has correct month
+- Records are sorted by month (descending)
+- No duplicate records
+
+---
+
+## Test Case 25: Performance Score Decimal Values
+
+**Test Case ID:** TC_PERF_010  
+**Priority:** Low  
+**Type:** Functional
+
+**Test Steps:**
+1. Create performance with decimal score: 87.5
+2. View performance history
+
+**Expected Result:**
+- Decimal value is preserved and displayed correctly
+- Score shows as "87.5" in history
+
+---
+
 ## Test Summary
 
 | Test Case ID | Status | Priority | Type |
@@ -378,4 +603,14 @@
 | TC_EMP_013 | Pass | Medium | Validation |
 | TC_EMP_014 | Pass | Low | Functional |
 | TC_EMP_015 | Pass | Critical | Security |
+| TC_PERF_001 | Pass | High | Functional |
+| TC_PERF_002 | Pass | High | Validation |
+| TC_PERF_003 | Pass | Medium | Validation |
+| TC_PERF_004 | Pass | High | Validation |
+| TC_PERF_005 | Pass | High | Functional |
+| TC_PERF_006 | Pass | Medium | Functional |
+| TC_PERF_007 | Pass | Low | Functional |
+| TC_PERF_008 | Pass | Medium | Validation |
+| TC_PERF_009 | Pass | Medium | Functional |
+| TC_PERF_010 | Pass | Low | Functional |
 

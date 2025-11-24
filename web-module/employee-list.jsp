@@ -118,6 +118,7 @@
                     <th>Name</th>
                     <th>Email</th>
                     <th>Department</th>
+                    <th>Performance</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -125,7 +126,7 @@
                 <c:choose>
                     <c:when test="${empty employees}">
                         <tr>
-                            <td colspan="5" style="text-align: center;">No employees found.</td>
+                            <td colspan="6" style="text-align: center;">No employees found.</td>
                         </tr>
                     </c:when>
                     <c:otherwise>
@@ -135,6 +136,11 @@
                                 <td>${employee.name}</td>
                                 <td>${employee.email}</td>
                                 <td>${employee.department}</td>
+                                <td>
+                                    <a href="employee?action=performanceHistory&id=${employee.id}" 
+                                       class="btn btn-view" 
+                                       style="background-color: #9c27b0;">View Performance</a>
+                                </td>
                                 <td class="actions">
                                     <a href="employee?action=view&id=${employee.id}" class="btn btn-view">View</a>
                                     <a href="employee?action=edit&id=${employee.id}" class="btn btn-edit">Edit</a>

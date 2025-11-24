@@ -1,6 +1,7 @@
 package ejb;
 
 import model.Employee;
+import model.EmployeePerformance;
 import java.util.List;
 import jakarta.ejb.Remote;
 
@@ -40,5 +41,34 @@ public interface EmployeeService {
      * Validate email uniqueness
      */
     boolean isEmailUnique(String email, Long excludeId) throws Exception;
+    
+    // ========== Performance Methods ==========
+    
+    /**
+     * Create or update employee performance for a month
+     */
+    Long saveEmployeePerformance(Long employeeId, String month, 
+                                 java.math.BigDecimal performanceScore, 
+                                 String rating, String notes) throws Exception;
+    
+    /**
+     * Get performance by employee ID and month
+     */
+    EmployeePerformance getEmployeePerformance(Long employeeId, String month) throws Exception;
+    
+    /**
+     * Get all performance records for an employee
+     */
+    List<EmployeePerformance> getEmployeePerformanceHistory(Long employeeId) throws Exception;
+    
+    /**
+     * Get latest performance for an employee
+     */
+    EmployeePerformance getLatestEmployeePerformance(Long employeeId) throws Exception;
+    
+    /**
+     * Delete performance record
+     */
+    void deleteEmployeePerformance(Long performanceId) throws Exception;
 }
 
