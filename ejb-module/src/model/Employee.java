@@ -14,9 +14,10 @@ public class Employee implements Serializable {
     private String name;
     private String email;
     private String department;
+    private Boolean active;
     
     public Employee() {
-        // Default constructor
+        this.active = true; // Default to active
     }
     
     public Employee(Long id, String name, String email, String department) {
@@ -24,6 +25,15 @@ public class Employee implements Serializable {
         this.name = name;
         this.email = email;
         this.department = department;
+        this.active = true; // Default to active
+    }
+    
+    public Employee(Long id, String name, String email, String department, Boolean active) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.department = department;
+        this.active = active != null ? active : true;
     }
     
     // Getters and Setters
@@ -59,6 +69,18 @@ public class Employee implements Serializable {
         this.department = department;
     }
     
+    public Boolean getActive() {
+        return active != null ? active : true;
+    }
+    
+    public void setActive(Boolean active) {
+        this.active = active != null ? active : true;
+    }
+    
+    public boolean isActive() {
+        return getActive();
+    }
+    
     @Override
     public String toString() {
         return "Employee{" +
@@ -66,6 +88,7 @@ public class Employee implements Serializable {
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
                 ", department='" + department + '\'' +
+                ", active=" + active +
                 '}';
     }
 }

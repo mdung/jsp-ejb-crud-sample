@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>Employee Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .detail-group {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .detail-value {
+            color: #333;
+            font-size: 16px;
+        }
+        .btn {
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            display: inline-block;
+            margin: 5px 5px 5px 0;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-edit {
+            background-color: #2196F3;
+            color: white;
+        }
+        .btn-edit:hover {
+            background-color: #0b7dda;
+        }
+        .btn-back {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-back:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Employee Details</h1>
+        
+        <h:panelGroup rendered="#{not empty employeeBean.employee}">
+            <div class="detail-group">
+                <div class="detail-label">ID</div>
+                <div class="detail-value">#{employeeBean.employee.id}</div>
+            </div>
+            
+            <div class="detail-group">
+                <div class="detail-label">Name</div>
+                <div class="detail-value">#{employeeBean.employee.name}</div>
+            </div>
+            
+            <div class="detail-group">
+                <div class="detail-label">Email</div>
+                <div class="detail-value">#{employeeBean.employee.email}</div>
+            </div>
+            
+            <div class="detail-group">
+                <div class="detail-label">Department</div>
+                <div class="detail-value">#{employeeBean.employee.department}</div>
+            </div>
+            
+            <div class="detail-group">
+                <div class="detail-label">Status</div>
+                <div class="detail-value">
+                    <h:outputText value="#{employeeBean.employee.active ? 'Active' : 'Inactive'}" 
+                                 style="color: #{employeeBean.employee.active ? 'green' : 'red'}; font-weight: bold; font-size: 18px;"/>
+                </div>
+            </div>
+            
+            <h:form id="detailForm">
+                <h:inputHidden id="employeeId" value="#{employeeBean.employeeId}"/>
+                <div class="detail-group">
+                    <div class="detail-label">Performance Management</div>
+                    <div class="detail-value">
+                        <h:commandLink value="View Performance History" 
+                                       action="#{employeeBean.viewPerformanceHistory}"
+                                       styleClass="btn btn-edit" 
+                                       style="background-color: #9c27b0; margin-right: 10px;">
+                            <f:param name="id" value="#{employeeBean.employeeId}"/>
+                        </h:commandLink>
+                        <h:commandLink value="Add/Update Performance" 
+                                       action="#{employeeBean.showPerformanceForm}"
+                                       styleClass="btn btn-edit" 
+                                       style="background-color: #4CAF50;">
+                            <f:param name="id" value="#{employeeBean.employeeId}"/>
+                        </h:commandLink>
+                    </div>
+                </div>
+                
+                <div>
+                    <h:commandLink value="Edit" 
+                                   action="#{employeeBean.showEditForm}"
+                                   styleClass="btn btn-edit">
+                        <f:param name="id" value="#{employeeBean.employeeId}"/>
+                    </h:commandLink>
+                    <h:commandLink value="#{employeeBean.employee.active ? 'Deactivate' : 'Activate'}" 
+                                   action="#{employeeBean.employee.active ? employeeBean.deactivateEmployee : employeeBean.activateEmployee}"
+                                   styleClass="btn"
+                                   style="background-color: #{employeeBean.employee.active ? '#ff9800' : '#4CAF50'}; color: white;"
+                                   onclick="return confirm('Are you sure you want to #{employeeBean.employee.active ? 'deactivate' : 'activate'} this employee?')">
+                        <f:param name="id" value="#{employeeBean.employeeId}"/>
+                    </h:commandLink>
+                    <h:commandLink value="Back to List" 
+                                   action="employee-list?faces-redirect=true"
+                                   styleClass="btn btn-back"/>
+                </div>
+            </h:form>
+        </h:panelGroup>
+        
+        <h:panelGroup rendered="#{empty employeeBean.employee}">
+            <p>Employee not found.</p>
+            <h:form>
+                <h:commandLink value="Back to List" 
+                               action="employee-list?faces-redirect=true"
+                               styleClass="btn btn-back"/>
+            </h:form>
+        </h:panelGroup>
+    </div>
+</body>
+</html>

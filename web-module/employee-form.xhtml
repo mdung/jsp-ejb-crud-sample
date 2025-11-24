@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>#{employeeBean.action == 'update' ? 'Edit Employee' : 'Add New Employee'}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: bold;
+        }
+        .required {
+            color: red;
+        }
+        .btn {
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        .btn-primary {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #45a049;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>#{employeeBean.action == 'update' ? 'Edit Employee' : 'Add New Employee'}</h1>
+        
+        <h:messages globalOnly="true" errorClass="error" infoClass="message"/>
+        
+        <h:panelGroup rendered="#{not empty employeeBean.employee}">
+            <h:form id="employeeForm">
+                <h:inputHidden id="action" value="#{employeeBean.action}"/>
+                <h:inputHidden id="employeeId" value="#{employeeBean.employee.id}"/>
+                
+                <div class="form-group">
+                    <h:outputLabel for="name" value="Name *" styleClass="label"/>
+                    <h:inputText id="name" value="#{employeeBean.employee.name}" 
+                                required="true" requiredMessage="Name is required"
+                                maxlength="100" style="width: 100%; padding: 10px;"/>
+                    <h:message for="name" styleClass="error"/>
+                </div>
+                
+                <div class="form-group">
+                    <h:outputLabel for="email" value="Email *" styleClass="label"/>
+                    <h:inputText id="email" value="#{employeeBean.employee.email}" 
+                                required="true" requiredMessage="Email is required"
+                                maxlength="100" style="width: 100%; padding: 10px;"/>
+                    <h:message for="email" styleClass="error"/>
+                </div>
+                
+            <div class="form-group">
+                <h:outputLabel for="department" value="Department *" styleClass="label"/>
+                <h:inputText id="department" value="#{employeeBean.employee.department}" 
+                            required="true" requiredMessage="Department is required"
+                            maxlength="50" style="width: 100%; padding: 10px;"/>
+                <h:message for="department" styleClass="error"/>
+            </div>
+            
+            <div class="form-group">
+                <h:outputLabel for="active" value="Status" styleClass="label"/>
+                <h:selectBooleanCheckbox id="active" value="#{employeeBean.employee.active}" 
+                                         style="margin-left: 10px;"/>
+                <h:outputText value="Active" style="margin-left: 5px;"/>
+                <h:message for="active" styleClass="error"/>
+            </div>
+            
+                <div class="form-group">
+                    <h:commandButton value="#{employeeBean.action == 'update' ? 'Update Employee' : 'Create Employee'}" 
+                                   action="#{employeeBean.submitForm}"
+                                   styleClass="btn btn-primary"/>
+                    <h:commandLink value="Cancel" action="employee-list?faces-redirect=true" 
+                                  styleClass="btn btn-secondary"
+                                  immediate="true"/>
+                </div>
+            </h:form>
+        </h:panelGroup>
+        
+        <h:panelGroup rendered="#{empty employeeBean.employee}">
+            <p>Loading form...</p>
+            <h:form>
+                <h:commandLink value="Back to List" action="employee-list?faces-redirect=true" 
+                              styleClass="btn btn-secondary"/>
+            </h:form>
+        </h:panelGroup>
+    </div>
+</body>
+</html>

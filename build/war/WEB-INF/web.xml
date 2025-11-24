@@ -5,26 +5,42 @@
          https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
          version="6.0">
     
-    <display-name>Employee Web Module</display-name>
+    <display-name>Employee Web Module - JSF</display-name>
     
+    <!-- JSF Faces Servlet -->
     <servlet>
-        <servlet-name>EmployeeServlet</servlet-name>
-        <servlet-class>controller.EmployeeServlet</servlet-class>
+        <servlet-name>Faces Servlet</servlet-name>
+        <servlet-class>jakarta.faces.webapp.FacesServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
     </servlet>
     
     <servlet-mapping>
-        <servlet-name>EmployeeServlet</servlet-name>
-        <url-pattern>/employee</url-pattern>
+        <servlet-name>Faces Servlet</servlet-name>
+        <url-pattern>*.xhtml</url-pattern>
     </servlet-mapping>
     
+    <!-- JSF Configuration -->
+    <context-param>
+        <param-name>jakarta.faces.PROJECT_STAGE</param-name>
+        <param-value>Development</param-value>
+    </context-param>
+    
+    <context-param>
+        <param-name>jakarta.faces.FACELETS_REFRESH_PERIOD</param-name>
+        <param-value>1</param-value>
+    </context-param>
+    
+    <context-param>
+        <param-name>jakarta.faces.DEFAULT_SUFFIX</param-name>
+        <param-value>.xhtml</param-value>
+    </context-param>
+    
     <welcome-file-list>
+        <welcome-file>index.xhtml</welcome-file>
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
     
-    <error-page>
-        <error-code>500</error-code>
-        <location>/error.jsp</location>
-    </error-page>
+    <!-- Error page removed - using JSF error handling -->
     
 </web-app>
 

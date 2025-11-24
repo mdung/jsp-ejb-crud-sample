@@ -50,6 +50,19 @@ public class EmployeeServiceBean implements EmployeeService {
     }
     
     @Override
+    public List<Employee> searchEmployees(String keyword) throws Exception {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return getAllEmployees();
+        }
+        return employeeDAO.search(keyword.trim());
+    }
+    
+    @Override
+    public List<Employee> getAllEmployeesSorted(String sortBy, String sortOrder) throws Exception {
+        return employeeDAO.findAllSorted(sortBy, sortOrder);
+    }
+    
+    @Override
     public void updateEmployee(Employee employee) throws Exception {
         // Validation
         validateEmployee(employee);
@@ -84,6 +97,36 @@ public class EmployeeServiceBean implements EmployeeService {
     @Override
     public boolean isEmailUnique(String email, Long excludeId) throws Exception {
         return !employeeDAO.emailExists(email, excludeId);
+    }
+    
+    @Override
+    public void activateEmployee(Long id) throws Exception {
+        if (id == null) {
+            throw new Exception("Employee ID cannot be null");
+        }
+        
+        // Check if employee exists
+        Employee employee = employeeDAO.findById(id);
+        if (employee == null) {
+            throw new Exception("Employee not found with ID: " + id);
+        }
+        
+        employeeDAO.activate(id);
+    }
+    
+    @Override
+    public void deactivateEmployee(Long id) throws Exception {
+        if (id == null) {
+            throw new Exception("Employee ID cannot be null");
+        }
+        
+        // Check if employee exists
+        Employee employee = employeeDAO.findById(id);
+        if (employee == null) {
+            throw new Exception("Employee not found with ID: " + id);
+        }
+        
+        employeeDAO.deactivate(id);
     }
     
     /**
@@ -220,5 +263,6 @@ public class EmployeeServiceBean implements EmployeeService {
             throw new Exception("Invalid month format. Must be YYYY-MM (e.g., 2025-11)");
         }
     }
+    
 }
 

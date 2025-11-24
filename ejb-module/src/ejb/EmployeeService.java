@@ -28,6 +28,16 @@ public interface EmployeeService {
     List<Employee> getAllEmployees() throws Exception;
     
     /**
+     * Search employees by keyword (name, email, or department)
+     */
+    List<Employee> searchEmployees(String keyword) throws Exception;
+    
+    /**
+     * Get all employees with sorting
+     */
+    List<Employee> getAllEmployeesSorted(String sortBy, String sortOrder) throws Exception;
+    
+    /**
      * Update employee
      */
     void updateEmployee(Employee employee) throws Exception;
@@ -70,5 +80,17 @@ public interface EmployeeService {
      * Delete performance record
      */
     void deleteEmployeePerformance(Long performanceId) throws Exception;
+    
+    // ========== Active/Inactive Methods ==========
+    
+    /**
+     * Activate employee
+     */
+    void activateEmployee(Long id) throws Exception;
+    
+    /**
+     * Deactivate employee
+     */
+    void deactivateEmployee(Long id) throws Exception;
 }
 

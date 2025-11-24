@@ -7,9 +7,13 @@ CREATE TABLE IF NOT EXISTS employees (
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     department VARCHAR(50) NOT NULL,
+    active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Add active column if table already exists
+ALTER TABLE employees ADD COLUMN IF NOT EXISTS active BOOLEAN DEFAULT TRUE;
 
 -- Sample Data
 INSERT INTO employees (name, email, department) VALUES

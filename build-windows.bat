@@ -3,7 +3,8 @@ REM Windows Build Script for JSP+EJB CRUD Application
 REM This script helps build and package the application for deployment
 
 echo ========================================
-echo JSP+EJB CRUD Application - Windows Build
+echo JSF+EJB CRUD Application - Windows Build
+echo Migrated from JSP to JSF (Facelets)
 echo ========================================
 echo.
 
@@ -11,7 +12,8 @@ REM Check if Java is installed
 java -version >nul 2>&1
 if errorlevel 1 (
     echo ERROR: Java is not installed or not in PATH
-    echo Please install Java 8 or later and add it to PATH
+    echo Please install Java 11 or later and add it to PATH
+    echo WildFly 38 requires Java 11+
     pause
     exit /b 1
 )
@@ -52,7 +54,9 @@ set EJB_CP=%EJB_CP%;%WILDFLY_HOME%\modules\system\layers\base\jakarta\servlet\ap
 set EJB_CP=%EJB_CP%;%WILDFLY_HOME%\modules\system\layers\base\jakarta\annotation\api\main\jakarta.annotation-api-2.1.1.jar
 
 echo [4/5] Compiling EJB module...
-javac -source 1.8 -target 1.8 -cp "%EJB_CP%" -d build\ejb-classes ejb-module\src\model\*.java ejb-module\src\dao\*.java ejb-module\src\ejb\*.java
+REM Note: WildFly 38 JARs are Java 11+, but we compile with Java 8 for compatibility
+REM If you have Java 11+, change -source and -target to 11
+javac -source 1.8 -target 1.8 -Xlint:-options -cp "%EJB_CP%" -d build\ejb-classes ejb-module\src\model\*.java ejb-module\src\dao\*.java ejb-module\src\ejb\*.java
 if errorlevel 1 (
     echo ERROR: EJB compilation failed
     pause
@@ -61,13 +65,37 @@ if errorlevel 1 (
 echo EJB module compiled successfully.
 echo.
 
-REM Set classpath for Web compilation
+REM Set classpath for Web compilation (JSF support)
 set WEB_CP=%EJB_CP%
 set WEB_CP=%WEB_CP%;build\ejb-classes
-set WEB_CP=%WEB_CP%;%WILDFLY_HOME%\modules\system\layers\base\jakarta\servlet\jsp\api\main\jakarta.servlet.jsp-api-3.1.1.jar
+
+REM Add CDI and Inject APIs - prefer local lib folder (Java 8 compatible), then WildFly modules
+if exist "lib\jakarta.enterprise.cdi-api-4.0.1.jar" (
+    set WEB_CP=%WEB_CP%;lib\jakarta.enterprise.cdi-api-4.0.1.jar
+) else (
+    set WEB_CP=%WEB_CP%;%WILDFLY_HOME%\modules\system\layers\base\jakarta\enterprise\api\main\jakarta.enterprise.cdi-api-4.0.1.jar
+)
+
+if exist "lib\jakarta.inject-api-2.0.1.jar" (
+    set WEB_CP=%WEB_CP%;lib\jakarta.inject-api-2.0.1.jar
+) else (
+    set WEB_CP=%WEB_CP%;%WILDFLY_HOME%\modules\system\layers\base\jakarta\inject\api\main\jakarta.inject-api-2.0.1.jar
+)
+
+REM Add JSF API - prefer local lib folder, then WildFly modules
+if exist "lib\jakarta.faces-api-4.0.jar" (
+    set WEB_CP=%WEB_CP%;lib\jakarta.faces-api-4.0.jar
+) else (
+    REM Try explicit path in WildFly
+    if exist "%WILDFLY_HOME%\modules\system\layers\base\jakarta\faces\api\main\jakarta.faces-api-4.0.jar" (
+        set WEB_CP=%WEB_CP%;%WILDFLY_HOME%\modules\system\layers\base\jakarta\faces\api\main\jakarta.faces-api-4.0.jar
+    )
+)
 
 echo [5/5] Compiling Web module...
-javac -source 1.8 -target 1.8 -cp "%WEB_CP%" -d build\web-classes web-module\src\controller\*.java
+REM Note: WildFly 38 JARs are Java 11+, but we compile with Java 8 for compatibility
+REM If you have Java 11+, change -source and -target to 11
+javac -source 1.8 -target 1.8 -Xlint:-options -cp "%WEB_CP%" -d build\web-classes web-module\src\controller\*.java
 if errorlevel 1 (
     echo ERROR: Web module compilation failed
     pause
@@ -86,11 +114,16 @@ REM Copy compiled classes
 xcopy /E /Y build\web-classes\* build\war\WEB-INF\classes\ >nul
 xcopy /E /Y build\ejb-classes\* build\war\WEB-INF\classes\ >nul
 
-REM Copy web.xml
+REM Copy web.xml and JSF config files
 copy /Y web-module\WEB-INF\web.xml build\war\WEB-INF\ >nul
+copy /Y web-module\WEB-INF\faces-config.xml build\war\WEB-INF\ >nul
+copy /Y web-module\WEB-INF\beans.xml build\war\WEB-INF\ >nul
 
-REM Copy JSP files
-copy /Y web-module\*.jsp build\war\ >nul
+REM Copy XHTML files (JSF Facelets)
+copy /Y web-module\*.xhtml build\war\ >nul 2>&1
+if errorlevel 1 (
+    echo WARNING: Some XHTML files may not have been copied
+)
 
 REM Create WAR file using jar command
 echo Packaging WAR file...
@@ -109,7 +142,7 @@ if exist "dist\employee-demo.war" (
     echo To deploy:
     echo 1. Copy dist\employee-demo.war to %WILDFLY_HOME%\standalone\deployments\
     echo 2. WildFly will auto-deploy it
-    echo 3. Access: http://localhost:8080/employee-demo/employee?action=list
+    echo 3. Access: http://localhost:8080/employee-demo/employee-list.xhtml
     echo.
 ) else (
     echo ERROR: WAR file creation failed

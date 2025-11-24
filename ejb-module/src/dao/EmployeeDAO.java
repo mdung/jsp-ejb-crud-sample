@@ -34,7 +34,7 @@ public class EmployeeDAO {
      * Create new employee
      */
     public Long create(Employee employee) throws SQLException, NamingException {
-        String sql = "INSERT INTO employees (name, email, department) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO employees (name, email, department, active) VALUES (?, ?, ?, ?)";
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -45,6 +45,7 @@ public class EmployeeDAO {
             pstmt.setString(1, employee.getName());
             pstmt.setString(2, employee.getEmail());
             pstmt.setString(3, employee.getDepartment());
+            pstmt.setBoolean(4, employee.getActive());
             
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows == 0) {
@@ -66,7 +67,7 @@ public class EmployeeDAO {
      * Find employee by ID
      */
     public Employee findById(Long id) throws SQLException, NamingException {
-        String sql = "SELECT id, name, email, department FROM employees WHERE id = ?";
+        String sql = "SELECT id, name, email, department, active FROM employees WHERE id = ?";
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -90,7 +91,77 @@ public class EmployeeDAO {
      * Find all employees
      */
     public List<Employee> findAll() throws SQLException, NamingException {
-        String sql = "SELECT id, name, email, department FROM employees ORDER BY id";
+        String sql = "SELECT id, name, email, department, active FROM employees ORDER BY id";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        List<Employee> employees = new ArrayList<Employee>();
+        
+        try {
+            conn = getConnection();
+            pstmt = conn.prepareStatement(sql);
+            rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                employees.add(mapResultSetToEmployee(rs));
+            }
+            return employees;
+        } finally {
+            closeResources(rs, pstmt, conn);
+        }
+    }
+    
+    /**
+     * Search employees by keyword (name, email, or department)
+     */
+    public List<Employee> search(String keyword) throws SQLException, NamingException {
+        String sql = "SELECT id, name, email, department, active FROM employees " +
+                     "WHERE LOWER(name) LIKE ? OR LOWER(email) LIKE ? OR LOWER(department) LIKE ? " +
+                     "ORDER BY id";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        List<Employee> employees = new ArrayList<Employee>();
+        
+        try {
+            conn = getConnection();
+            pstmt = conn.prepareStatement(sql);
+            String searchPattern = "%" + keyword.toLowerCase() + "%";
+            pstmt.setString(1, searchPattern);
+            pstmt.setString(2, searchPattern);
+            pstmt.setString(3, searchPattern);
+            rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                employees.add(mapResultSetToEmployee(rs));
+            }
+            return employees;
+        } finally {
+            closeResources(rs, pstmt, conn);
+        }
+    }
+    
+    /**
+     * Find all employees with sorting
+     */
+    public List<Employee> findAllSorted(String sortBy, String sortOrder) throws SQLException, NamingException {
+        // Validate sortBy to prevent SQL injection
+        String validSortBy = "id";
+        if ("name".equalsIgnoreCase(sortBy)) {
+            validSortBy = "name";
+        } else if ("email".equalsIgnoreCase(sortBy)) {
+            validSortBy = "email";
+        } else if ("department".equalsIgnoreCase(sortBy)) {
+            validSortBy = "department";
+        }
+        
+        // Validate sortOrder
+        String validSortOrder = "ASC";
+        if ("DESC".equalsIgnoreCase(sortOrder)) {
+            validSortOrder = "DESC";
+        }
+        
+        String sql = "SELECT id, name, email, department, active FROM employees ORDER BY " + validSortBy + " " + validSortOrder;
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -114,7 +185,7 @@ public class EmployeeDAO {
      * Update employee
      */
     public void update(Employee employee) throws SQLException, NamingException {
-        String sql = "UPDATE employees SET name = ?, email = ?, department = ? WHERE id = ?";
+        String sql = "UPDATE employees SET name = ?, email = ?, department = ?, active = ? WHERE id = ?";
         Connection conn = null;
         PreparedStatement pstmt = null;
         
@@ -124,7 +195,8 @@ public class EmployeeDAO {
             pstmt.setString(1, employee.getName());
             pstmt.setString(2, employee.getEmail());
             pstmt.setString(3, employee.getDepartment());
-            pstmt.setLong(4, employee.getId());
+            pstmt.setBoolean(4, employee.getActive());
+            pstmt.setLong(5, employee.getId());
             
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows == 0) {
@@ -191,7 +263,58 @@ public class EmployeeDAO {
         employee.setName(rs.getString("name"));
         employee.setEmail(rs.getString("email"));
         employee.setDepartment(rs.getString("department"));
+        // Handle active column - may not exist in old databases
+        try {
+            employee.setActive(rs.getBoolean("active"));
+        } catch (SQLException e) {
+            // Column doesn't exist, default to true
+            employee.setActive(true);
+        }
         return employee;
+    }
+    
+    /**
+     * Activate employee
+     */
+    public void activate(Long id) throws SQLException, NamingException {
+        String sql = "UPDATE employees SET active = true WHERE id = ?";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        
+        try {
+            conn = getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setLong(1, id);
+            
+            int affectedRows = pstmt.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Activating employee failed, no rows affected.");
+            }
+        } finally {
+            closeResources(null, pstmt, conn);
+        }
+    }
+    
+    /**
+     * Deactivate employee
+     */
+    public void deactivate(Long id) throws SQLException, NamingException {
+        String sql = "UPDATE employees SET active = false WHERE id = ?";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        
+        try {
+            conn = getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setLong(1, id);
+            
+            int affectedRows = pstmt.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Deactivating employee failed, no rows affected.");
+            }
+        } finally {
+            closeResources(null, pstmt, conn);
+        }
     }
     
     /**

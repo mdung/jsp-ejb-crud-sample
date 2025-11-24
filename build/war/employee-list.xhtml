@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>Employee List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .message {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .btn {
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 4px;
+            display: inline-block;
+            margin: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-primary {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #45a049;
+        }
+        .btn-edit {
+            background-color: #2196F3;
+            color: white;
+        }
+        .btn-edit:hover {
+            background-color: #0b7dda;
+        }
+        .btn-delete {
+            background-color: #f44336;
+            color: white;
+        }
+        .btn-delete:hover {
+            background-color: #da190b;
+        }
+        .btn-view {
+            background-color: #ff9800;
+            color: white;
+        }
+        .btn-view:hover {
+            background-color: #e68900;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .actions {
+            white-space: nowrap;
+        }
+        .search-form {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Employee Management System</h1>
+        
+        <h:messages globalOnly="true" infoClass="message" errorClass="message error"/>
+        
+        <h:form>
+            <h:commandLink value="Add New Employee" action="#{employeeBean.showNewForm}" 
+                           styleClass="btn btn-primary"/>
+        </h:form>
+        
+        <!-- Search and Sort Form -->
+        <h:form id="searchForm" style="margin: 20px 0;">
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 200px;">
+                    <h:inputText id="searchKeyword" value="#{employeeBean.searchKeyword}" 
+                                placeholder="Search by name, email, or department..."
+                                style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"/>
+                </div>
+                <div>
+                    <h:commandButton value="Search" action="#{employeeBean.searchEmployees}"
+                                    styleClass="btn btn-primary"/>
+                </div>
+                <div>
+                    <h:commandButton value="Clear" action="#{employeeBean.clearSearch}"
+                                    styleClass="btn btn-secondary"
+                                    rendered="#{not empty employeeBean.searchKeyword}"/>
+                </div>
+            </div>
+        </h:form>
+        
+        <h:form>
+            <h:dataTable value="#{employeeBean.employees}" var="employee" 
+                         styleClass="table" headerClass="table-header"
+                         rendered="#{not empty employeeBean.employees}">
+                <h:column>
+                    <f:facet name="header">
+                        <h:commandLink value="ID" action="#{employeeBean.sortEmployees}" 
+                                      style="color: white; text-decoration: none; font-weight: bold;">
+                            <f:param name="column" value="id"/>
+                        </h:commandLink>
+                        <h:outputText value=" #{employeeBean.sortBy == 'id' ? (employeeBean.sortOrder == 'ASC' ? '↑' : '↓') : ''}" 
+                                     style="color: white;"/>
+                    </f:facet>
+                    <h:outputText value="#{employee.id}"/>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">
+                        <h:commandLink value="Name" action="#{employeeBean.sortEmployees}" 
+                                      style="color: white; text-decoration: none; font-weight: bold;">
+                            <f:param name="column" value="name"/>
+                        </h:commandLink>
+                        <h:outputText value=" #{employeeBean.sortBy == 'name' ? (employeeBean.sortOrder == 'ASC' ? '↑' : '↓') : ''}" 
+                                     style="color: white;"/>
+                    </f:facet>
+                    <h:outputText value="#{employee.name}"/>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">
+                        <h:commandLink value="Email" action="#{employeeBean.sortEmployees}" 
+                                      style="color: white; text-decoration: none; font-weight: bold;">
+                            <f:param name="column" value="email"/>
+                        </h:commandLink>
+                        <h:outputText value=" #{employeeBean.sortBy == 'email' ? (employeeBean.sortOrder == 'ASC' ? '↑' : '↓') : ''}" 
+                                     style="color: white;"/>
+                    </f:facet>
+                    <h:outputText value="#{employee.email}"/>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">
+                        <h:commandLink value="Department" action="#{employeeBean.sortEmployees}" 
+                                      style="color: white; text-decoration: none; font-weight: bold;">
+                            <f:param name="column" value="department"/>
+                        </h:commandLink>
+                        <h:outputText value=" #{employeeBean.sortBy == 'department' ? (employeeBean.sortOrder == 'ASC' ? '↑' : '↓') : ''}" 
+                                     style="color: white;"/>
+                    </f:facet>
+                    <h:outputText value="#{employee.department}"/>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Performance</f:facet>
+                    <h:commandLink value="View Performance" 
+                                   action="#{employeeBean.viewPerformanceHistory}"
+                                   styleClass="btn btn-view" 
+                                   style="background-color: #9c27b0;">
+                        <f:param name="id" value="#{employee.id}"/>
+                    </h:commandLink>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Actions</f:facet>
+                    <h:commandLink value="View" 
+                                   action="#{employeeBean.viewEmployee}"
+                                   styleClass="btn btn-view">
+                        <f:param name="id" value="#{employee.id}"/>
+                    </h:commandLink>
+                    <h:commandLink value="Edit" 
+                                   action="#{employeeBean.showEditForm}"
+                                   styleClass="btn btn-edit">
+                        <f:param name="id" value="#{employee.id}"/>
+                    </h:commandLink>
+                    <h:commandLink value="Delete" 
+                                   action="#{employeeBean.deleteEmployee}"
+                                   styleClass="btn btn-delete"
+                                   onclick="return confirm('Are you sure you want to delete this employee?')">
+                        <f:param name="id" value="#{employee.id}"/>
+                    </h:commandLink>
+                    <h:commandLink value="#{employee.active ? 'Deactivate' : 'Activate'}" 
+                                   action="#{employee.active ? employeeBean.deactivateEmployee : employeeBean.activateEmployee}"
+                                   styleClass="btn"
+                                   style="background-color: #{employee.active ? '#ff9800' : '#4CAF50'}; color: white;"
+                                   onclick="return confirm('Are you sure you want to #{employee.active ? 'deactivate' : 'activate'} this employee?')">
+                        <f:param name="id" value="#{employee.id}"/>
+                    </h:commandLink>
+                </h:column>
+            </h:dataTable>
+        </h:form>
+        
+        <h:panelGroup rendered="#{empty employeeBean.employees}">
+            <p style="text-align: center;">No employees found.</p>
+        </h:panelGroup>
+    </div>
+</body>
+</html>
+

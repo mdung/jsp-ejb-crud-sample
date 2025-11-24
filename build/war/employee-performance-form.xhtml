@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>Employee Performance</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        .employee-info {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .employee-info strong {
+            color: #333;
+        }
+        .btn {
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            display: inline-block;
+            margin: 5px 5px 5px 0;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-submit {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .btn-submit:hover {
+            background-color: #45a049;
+        }
+        .btn-cancel {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-cancel:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Employee Performance</h1>
+        
+        <h:panelGroup rendered="#{not empty employeeBean.employee}">
+            <div class="employee-info">
+                <strong>Employee:</strong> #{employeeBean.employee.name} (#{employeeBean.employee.email})<br/>
+                <strong>Department:</strong> #{employeeBean.employee.department}
+            </div>
+        </h:panelGroup>
+        
+        <h:messages globalOnly="true" errorClass="error" infoClass="message"/>
+        
+        <h:form>
+            <h:inputHidden value="#{employeeBean.employeeId}"/>
+            
+            <div class="form-group">
+                <h:outputLabel for="month" value="Month (YYYY-MM):"/>
+                <h:inputText id="month" value="#{employeeBean.month}" 
+                            required="true" requiredMessage="Month is required"
+                            pattern="\\d{4}-\\d{2}" 
+                            placeholder="2025-11"
+                            style="width: 100%; padding: 8px;"/>
+                <h:message for="month" styleClass="error"/>
+                <small style="color: #666;">Format: YYYY-MM (e.g., 2025-11)</small>
+            </div>
+            
+            <div class="form-group">
+                <h:outputLabel for="performanceScore" value="Performance Score (0-100):"/>
+                <h:inputText id="performanceScore" value="#{employeeBean.performanceScore}" 
+                            required="true" requiredMessage="Performance score is required"
+                            converter="jakarta.faces.BigDecimal"
+                            style="width: 100%; padding: 8px;"/>
+                <h:message for="performanceScore" styleClass="error"/>
+            </div>
+            
+            <div class="form-group">
+                <h:outputLabel for="rating" value="Rating:"/>
+                <h:selectOneMenu id="rating" value="#{employeeBean.rating}" 
+                               required="true" requiredMessage="Rating is required"
+                               style="width: 100%; padding: 8px;">
+                    <f:selectItem itemValue="" itemLabel="-- Select Rating --"/>
+                    <f:selectItem itemValue="Excellent" itemLabel="Excellent"/>
+                    <f:selectItem itemValue="Good" itemLabel="Good"/>
+                    <f:selectItem itemValue="Average" itemLabel="Average"/>
+                    <f:selectItem itemValue="Poor" itemLabel="Poor"/>
+                </h:selectOneMenu>
+                <h:message for="rating" styleClass="error"/>
+            </div>
+            
+            <div class="form-group">
+                <h:outputLabel for="notes" value="Notes:"/>
+                <h:inputTextarea id="notes" value="#{employeeBean.notes}" 
+                                rows="5" cols="50"
+                                style="width: 100%; padding: 8px; height: 100px;"/>
+            </div>
+            
+            <div>
+                <h:commandButton value="Save Performance" 
+                               action="#{employeeBean.savePerformance}"
+                               styleClass="btn btn-submit"/>
+                <h:commandLink value="Cancel" 
+                              action="#{employeeBean.cancelPerformanceForm}"
+                              styleClass="btn btn-cancel"/>
+            </div>
+        </h:form>
+    </div>
+</body>
+</html>
