@@ -566,10 +566,17 @@ public class EmployeeBean {
             try {
                 loadEmployees();
             } catch (Exception e) {
-                addErrorMessage("Error loading employees: " + e.getMessage());
+                // Log error but don't show multiple error messages
+                System.err.println("Error loading employees: " + e.getMessage());
+                e.printStackTrace();
+                // Only add error message if not already added
+                if (employees == null) {
+                    employees = new java.util.ArrayList<Employee>(); // Return empty list instead of null
+                    addErrorMessage("Error loading employees: " + e.getMessage() + ". Please check database connection.");
+                }
             }
         }
-        return employees;
+        return employees != null ? employees : new java.util.ArrayList<Employee>();
     }
     
     public void setEmployees(List<Employee> employees) {
