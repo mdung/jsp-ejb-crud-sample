@@ -3,14 +3,16 @@ package controller;
 import ejb.EmployeeService;
 import model.Employee;
 import model.EmployeePerformance;
-import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Named;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
+import jakarta.enterprise.context.RequestScoped;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import java.util.List;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Employee Managed Bean for JSF
@@ -20,6 +22,7 @@ import java.math.BigDecimal;
 @Named(value = "employeeBean")
 @RequestScoped
 public class EmployeeBean {
+    private static final Logger LOGGER = Logger.getLogger(EmployeeBean.class.getName());
     
     private static final String JNDI_NAME = "java:global/employee-demo/EmployeeServiceBean!ejb.EmployeeService";
     
@@ -36,7 +39,6 @@ public class EmployeeBean {
     private List<Employee> employees;
     private Employee employee;
     private Long employeeId;
-    private String action;
     private String message;
     private String error;
     
@@ -52,6 +54,34 @@ public class EmployeeBean {
     private BigDecimal performanceScore;
     private String rating;
     private String notes;
+
+    /**
+     * Prepare data for employee-form (Add / Edit).
+     * Called from f:viewAction in employee-form.xhtml.
+     */
+    public void prepareForm() {
+        try {
+            LOGGER.info("prepareForm called, employeeId=" + employeeId);
+            if (employeeId != null) {
+                // Edit mode: load employee từ DB
+                employee = getEmployeeService().getEmployeeById(employeeId);
+                if (employee == null) {
+                    addErrorMessage("Employee not found with ID: " + employeeId);
+                } else {
+                    LOGGER.info("Loaded employee for edit, ID=" + employee.getId());
+                }
+            } else {
+                // Add mode: tạo employee mới
+                if (employee == null) {
+                    employee = new Employee();
+                    LOGGER.info("Initialized new employee for create");
+                }
+            }
+        } catch (Exception e) {
+            addErrorMessage("Error preparing form: " + e.getMessage());
+            LOGGER.severe("prepareForm error: " + e.getMessage());
+        }
+    }
     
     /**
      * Initialize - load employees list
@@ -180,8 +210,7 @@ public class EmployeeBean {
      */
     public String showNewForm() {
         try {
-            employee = new Employee();
-            action = "create";
+            employee = new Employee();   // id == null → create mode
             employeeId = null;
             return "employee-form";
         } catch (Exception e) {
@@ -205,7 +234,6 @@ public class EmployeeBean {
                 return "employee-list?faces-redirect=true";
             }
             employeeId = id;
-            action = "update";
             return "employee-form";
         } catch (Exception e) {
             addErrorMessage("Error loading employee: " + e.getMessage());
@@ -244,6 +272,7 @@ public class EmployeeBean {
             if (employee.getId() != null) {
                 employeeId = employee.getId();
             }
+            // Forward to detail page in the same request so data is available
             return "employee-detail";
         } catch (Exception e) {
             addErrorMessage("Error loading employee: " + e.getMessage());
@@ -264,30 +293,31 @@ public class EmployeeBean {
     }
     
     /**
-     * Submit form - handles both create and update
+     * Submit form - handles both create and update (dựa vào employee.id)
      */
     public String submitForm() {
         try {
+            LOGGER.info("submitForm called, employeeId=" + employeeId
+                    + ", employee.id=" + (employee != null ? employee.getId() : null));
+            
             // Ensure employee is not null
             if (employee == null) {
                 addErrorMessage("Employee data is missing. Please try again.");
+                LOGGER.warning("submitForm aborted: employee is null");
                 return null;
             }
             
-            // For update, ensure ID is set
-            if ("update".equals(action)) {
-                // If employee.id is null, try to get from employeeId
-                if (employee.getId() == null && employeeId != null) {
-                    employee.setId(employeeId);
-                }
+            // Nếu có id → update, ngược lại → create
+            if (employee.getId() != null) {
+                LOGGER.info("submitForm detected UPDATE, employee.id=" + employee.getId());
                 return updateEmployee();
             } else {
-                // For create, ensure ID is null
-                employee.setId(null);
+                LOGGER.info("submitForm detected CREATE");
                 return createEmployee();
             }
         } catch (Exception e) {
             addErrorMessage("Error submitting form: " + e.getMessage());
+            LOGGER.severe("submitForm error: " + e.getMessage());
             return null;
         }
     }
@@ -431,6 +461,7 @@ public class EmployeeBean {
      */
     public String savePerformance() {
         try {
+            LOGGER.info("savePerformance called, employeeId=" + employeeId);
             if (employeeId == null) {
                 addErrorMessage("Employee ID is required");
                 return null;
@@ -450,11 +481,16 @@ public class EmployeeBean {
             
             getEmployeeService().saveEmployeePerformance(employeeId, month, performanceScore, rating, notes);
             addSuccessMessage("Performance saved successfully");
-            // Set employee for detail view
+            // Reload employee for detail view - forward in same request to preserve state
             employee = getEmployeeService().getEmployeeById(employeeId);
-            return "employee-detail?faces-redirect=true";
+            if (employee != null && employee.getId() != null) {
+                employeeId = employee.getId();
+            }
+            LOGGER.info("Performance saved, forwarding to employee-detail, employeeId=" + employeeId);
+            return "employee-detail";
         } catch (Exception e) {
             addErrorMessage("Error saving performance: " + e.getMessage());
+            LOGGER.severe("savePerformance error: " + e.getMessage());
             return null; // Stay on form
         }
     }
@@ -466,9 +502,13 @@ public class EmployeeBean {
         if (employeeId != null) {
             try {
                 employee = getEmployeeService().getEmployeeById(employeeId);
+                if (employee != null && employee.getId() != null) {
+                    employeeId = employee.getId();
+                }
                 return "employee-detail";
             } catch (Exception e) {
                 addErrorMessage("Error loading employee: " + e.getMessage());
+                LOGGER.severe("cancelPerformanceForm error: " + e.getMessage());
             }
         }
         return "employee-list?faces-redirect=true";
@@ -584,6 +624,10 @@ public class EmployeeBean {
     }
     
     public Employee getEmployee() {
+        // Ensure we never return null to avoid JSF "Target Unreachable"
+        if (employee == null) {
+            employee = new Employee();
+        }
         return employee;
     }
     
@@ -597,14 +641,6 @@ public class EmployeeBean {
     
     public void setEmployeeId(Long employeeId) {
         this.employeeId = employeeId;
-    }
-    
-    public String getAction() {
-        return action;
-    }
-    
-    public void setAction(String action) {
-        this.action = action;
     }
     
     public String getMessage() {

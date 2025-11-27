@@ -6,6 +6,7 @@ import dao.EmployeeDAO;
 import dao.EmployeePerformanceDAO;
 import java.util.List;
 import java.math.BigDecimal;
+import java.util.logging.Logger;
 import jakarta.ejb.Stateless;
 
 /**
@@ -14,6 +15,8 @@ import jakarta.ejb.Stateless;
  */
 @Stateless
 public class EmployeeServiceBean implements EmployeeService {
+    
+    private static final Logger LOGGER = Logger.getLogger(EmployeeServiceBean.class.getName());
     
     private EmployeeDAO employeeDAO;
     private EmployeePerformanceDAO performanceDAO;
@@ -33,7 +36,15 @@ public class EmployeeServiceBean implements EmployeeService {
             throw new Exception("Email already exists: " + employee.getEmail());
         }
         
-        return employeeDAO.create(employee);
+        LOGGER.info("Creating new employee: name=" + employee.getName() 
+                + ", email=" + employee.getEmail() 
+                + ", department=" + employee.getDepartment());
+        
+        Long id = employeeDAO.create(employee);
+        
+        LOGGER.info("Employee created successfully with ID=" + id);
+        
+        return id;
     }
     
     @Override
@@ -41,24 +52,34 @@ public class EmployeeServiceBean implements EmployeeService {
         if (id == null) {
             throw new Exception("Employee ID cannot be null");
         }
-        return employeeDAO.findById(id);
+        LOGGER.info("Fetching employee by ID=" + id);
+        Employee emp = employeeDAO.findById(id);
+        if (emp == null) {
+            LOGGER.warning("Employee not found with ID=" + id);
+        }
+        return emp;
     }
     
     @Override
     public List<Employee> getAllEmployees() throws Exception {
+        LOGGER.info("Fetching all employees");
         return employeeDAO.findAll();
     }
     
     @Override
     public List<Employee> searchEmployees(String keyword) throws Exception {
         if (keyword == null || keyword.trim().isEmpty()) {
+            LOGGER.info("Search employees with empty keyword -> returning all");
             return getAllEmployees();
         }
-        return employeeDAO.search(keyword.trim());
+        String kw = keyword.trim();
+        LOGGER.info("Searching employees with keyword='" + kw + "'");
+        return employeeDAO.search(kw);
     }
     
     @Override
     public List<Employee> getAllEmployeesSorted(String sortBy, String sortOrder) throws Exception {
+        LOGGER.info("Fetching all employees sorted by sortBy=" + sortBy + ", sortOrder=" + sortOrder);
         return employeeDAO.findAllSorted(sortBy, sortOrder);
     }
     
@@ -76,7 +97,13 @@ public class EmployeeServiceBean implements EmployeeService {
             throw new Exception("Email already exists: " + employee.getEmail());
         }
         
+        LOGGER.info("Updating employee ID=" + employee.getId()
+                + ", firstName=" + employee.getFirstName()
+                + ", name=" + employee.getName()
+                + ", email=" + employee.getEmail()
+                + ", department=" + employee.getDepartment());
         employeeDAO.update(employee);
+        LOGGER.info("Employee updated successfully, ID=" + employee.getId());
     }
     
     @Override
@@ -85,13 +112,25 @@ public class EmployeeServiceBean implements EmployeeService {
             throw new Exception("Employee ID cannot be null");
         }
         
+        LOGGER.info("Deleting employee ID=" + id);
+        
         // Check if employee exists
         Employee employee = employeeDAO.findById(id);
         if (employee == null) {
             throw new Exception("Employee not found with ID: " + id);
         }
         
+        // Delete all performance records for this employee first (avoid FK issues)
+        List<EmployeePerformance> perfList = performanceDAO.findByEmployeeId(id);
+        if (perfList != null && !perfList.isEmpty()) {
+            for (EmployeePerformance perf : perfList) {
+                performanceDAO.delete(perf.getId());
+            }
+            LOGGER.info("Deleted " + perfList.size() + " performance record(s) for employee ID=" + id);
+        }
+        
         employeeDAO.delete(id);
+        LOGGER.info("Employee deleted successfully, ID=" + id);
     }
     
     @Override
@@ -106,12 +145,14 @@ public class EmployeeServiceBean implements EmployeeService {
         }
         
         // Check if employee exists
+        LOGGER.info("Activating employee ID=" + id);
         Employee employee = employeeDAO.findById(id);
         if (employee == null) {
             throw new Exception("Employee not found with ID: " + id);
         }
         
         employeeDAO.activate(id);
+        LOGGER.info("Employee activated successfully, ID=" + id);
     }
     
     @Override
@@ -121,12 +162,14 @@ public class EmployeeServiceBean implements EmployeeService {
         }
         
         // Check if employee exists
+        LOGGER.info("Deactivating employee ID=" + id);
         Employee employee = employeeDAO.findById(id);
         if (employee == null) {
             throw new Exception("Employee not found with ID: " + id);
         }
         
         employeeDAO.deactivate(id);
+        LOGGER.info("Employee deactivated successfully, ID=" + id);
     }
     
     /**
@@ -162,6 +205,7 @@ public class EmployeeServiceBean implements EmployeeService {
                                        BigDecimal performanceScore, 
                                        String rating, String notes) throws Exception {
         // Validate employee exists
+        LOGGER.info("Saving performance for employeeId=" + employeeId + ", month=" + month);
         Employee employee = employeeDAO.findById(employeeId);
         if (employee == null) {
             throw new Exception("Employee not found with ID: " + employeeId);
@@ -175,6 +219,8 @@ public class EmployeeServiceBean implements EmployeeService {
         
         if (existing != null) {
             // Update existing
+            LOGGER.info("Updating existing performance record ID=" + existing.getId()
+                    + " for employeeId=" + employeeId + ", month=" + month);
             existing.setPerformanceScore(performanceScore);
             existing.setRating(rating);
             existing.setNotes(notes);
@@ -184,7 +230,10 @@ public class EmployeeServiceBean implements EmployeeService {
             // Create new
             EmployeePerformance performance = new EmployeePerformance(
                 employeeId, month, performanceScore, rating, notes);
-            return performanceDAO.create(performance);
+            Long perfId = performanceDAO.create(performance);
+            LOGGER.info("Created new performance record ID=" + perfId
+                    + " for employeeId=" + employeeId + ", month=" + month);
+            return perfId;
         }
     }
     
@@ -196,6 +245,7 @@ public class EmployeeServiceBean implements EmployeeService {
         if (month == null || month.trim().isEmpty()) {
             throw new Exception("Month cannot be null or empty");
         }
+        LOGGER.info("Fetching performance for employeeId=" + employeeId + ", month=" + month);
         return performanceDAO.findByEmployeeIdAndMonth(employeeId, month);
     }
     
@@ -204,6 +254,7 @@ public class EmployeeServiceBean implements EmployeeService {
         if (employeeId == null) {
             throw new Exception("Employee ID cannot be null");
         }
+        LOGGER.info("Fetching performance history for employeeId=" + employeeId);
         return performanceDAO.findByEmployeeId(employeeId);
     }
     
@@ -212,6 +263,7 @@ public class EmployeeServiceBean implements EmployeeService {
         if (employeeId == null) {
             throw new Exception("Employee ID cannot be null");
         }
+        LOGGER.info("Fetching latest performance for employeeId=" + employeeId);
         return performanceDAO.findLatestByEmployeeId(employeeId);
     }
     
@@ -220,7 +272,9 @@ public class EmployeeServiceBean implements EmployeeService {
         if (performanceId == null) {
             throw new Exception("Performance ID cannot be null");
         }
+        LOGGER.info("Deleting performance record ID=" + performanceId);
         performanceDAO.delete(performanceId);
+        LOGGER.info("Performance record deleted successfully, ID=" + performanceId);
     }
     
     /**

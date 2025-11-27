@@ -80,7 +80,8 @@
         <h:messages globalOnly="true" errorClass="error" infoClass="message"/>
         
         <h:form>
-            <h:inputHidden value="#{employeeBean.employeeId}"/>
+            <h:inputHidden id="employeeId" value="#{employeeBean.employeeId}"/>
+            <h:inputHidden id="employeeIdFromEmployee" value="#{employeeBean.employee.id}"/>
             
             <div class="form-group">
                 <h:outputLabel for="month" value="Month (YYYY-MM):"/>

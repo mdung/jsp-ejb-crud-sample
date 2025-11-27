@@ -34,7 +34,7 @@ public class EmployeeDAO {
      * Create new employee
      */
     public Long create(Employee employee) throws SQLException, NamingException {
-        String sql = "INSERT INTO employees (name, email, department, active) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO employees (firstname, name, email, department, active, date_of_birth) VALUES (?, ?, ?, ?, ?, ?)";
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -42,10 +42,16 @@ public class EmployeeDAO {
         try {
             conn = getConnection();
             pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            pstmt.setString(1, employee.getName());
-            pstmt.setString(2, employee.getEmail());
-            pstmt.setString(3, employee.getDepartment());
-            pstmt.setBoolean(4, employee.getActive());
+            pstmt.setString(1, employee.getFirstName());
+            pstmt.setString(2, employee.getName());
+            pstmt.setString(3, employee.getEmail());
+            pstmt.setString(4, employee.getDepartment());
+            pstmt.setBoolean(5, employee.getActive());
+            if (employee.getDateOfBirth() != null) {
+                pstmt.setDate(6, new java.sql.Date(employee.getDateOfBirth().getTime()));
+            } else {
+                pstmt.setDate(6, null);
+            }
             
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows == 0) {
@@ -67,7 +73,7 @@ public class EmployeeDAO {
      * Find employee by ID
      */
     public Employee findById(Long id) throws SQLException, NamingException {
-        String sql = "SELECT id, name, email, department, active FROM employees WHERE id = ?";
+        String sql = "SELECT id, firstname, name, email, department, active, date_of_birth FROM employees WHERE id = ?";
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -91,7 +97,7 @@ public class EmployeeDAO {
      * Find all employees
      */
     public List<Employee> findAll() throws SQLException, NamingException {
-        String sql = "SELECT id, name, email, department, active FROM employees ORDER BY id";
+        String sql = "SELECT id, firstname, name, email, department, active, date_of_birth FROM employees ORDER BY id";
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -115,8 +121,8 @@ public class EmployeeDAO {
      * Search employees by keyword (name, email, or department)
      */
     public List<Employee> search(String keyword) throws SQLException, NamingException {
-        String sql = "SELECT id, name, email, department, active FROM employees " +
-                     "WHERE LOWER(name) LIKE ? OR LOWER(email) LIKE ? OR LOWER(department) LIKE ? " +
+        String sql = "SELECT id, firstname, name, email, department, active, date_of_birth FROM employees " +
+                     "WHERE LOWER(firstname) LIKE ? OR LOWER(name) LIKE ? OR LOWER(email) LIKE ? OR LOWER(department) LIKE ? " +
                      "ORDER BY id";
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -130,6 +136,7 @@ public class EmployeeDAO {
             pstmt.setString(1, searchPattern);
             pstmt.setString(2, searchPattern);
             pstmt.setString(3, searchPattern);
+            pstmt.setString(4, searchPattern);
             rs = pstmt.executeQuery();
             
             while (rs.next()) {
@@ -161,7 +168,7 @@ public class EmployeeDAO {
             validSortOrder = "DESC";
         }
         
-        String sql = "SELECT id, name, email, department, active FROM employees ORDER BY " + validSortBy + " " + validSortOrder;
+        String sql = "SELECT id, firstname, name, email, department, active, date_of_birth FROM employees ORDER BY " + validSortBy + " " + validSortOrder;
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -185,18 +192,24 @@ public class EmployeeDAO {
      * Update employee
      */
     public void update(Employee employee) throws SQLException, NamingException {
-        String sql = "UPDATE employees SET name = ?, email = ?, department = ?, active = ? WHERE id = ?";
+        String sql = "UPDATE employees SET firstname = ?, name = ?, email = ?, department = ?, active = ?, date_of_birth = ? WHERE id = ?";
         Connection conn = null;
         PreparedStatement pstmt = null;
         
         try {
             conn = getConnection();
             pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, employee.getName());
-            pstmt.setString(2, employee.getEmail());
-            pstmt.setString(3, employee.getDepartment());
-            pstmt.setBoolean(4, employee.getActive());
-            pstmt.setLong(5, employee.getId());
+            pstmt.setString(1, employee.getFirstName());
+            pstmt.setString(2, employee.getName());
+            pstmt.setString(3, employee.getEmail());
+            pstmt.setString(4, employee.getDepartment());
+            pstmt.setBoolean(5, employee.getActive());
+            if (employee.getDateOfBirth() != null) {
+                pstmt.setDate(6, new java.sql.Date(employee.getDateOfBirth().getTime()));
+            } else {
+                pstmt.setDate(6, null);
+            }
+            pstmt.setLong(7, employee.getId());
             
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows == 0) {
@@ -260,6 +273,12 @@ public class EmployeeDAO {
     private Employee mapResultSetToEmployee(ResultSet rs) throws SQLException {
         Employee employee = new Employee();
         employee.setId(rs.getLong("id"));
+        try {
+            employee.setFirstName(rs.getString("firstname"));
+        } catch (SQLException e) {
+            // Column may not exist in older schemas
+            employee.setFirstName(null);
+        }
         employee.setName(rs.getString("name"));
         employee.setEmail(rs.getString("email"));
         employee.setDepartment(rs.getString("department"));
@@ -269,6 +288,18 @@ public class EmployeeDAO {
         } catch (SQLException e) {
             // Column doesn't exist, default to true
             employee.setActive(true);
+        }
+        // Handle date_of_birth column - may not exist in old databases
+        try {
+            java.sql.Date sqlDate = rs.getDate("date_of_birth");
+            if (sqlDate != null) {
+                employee.setDateOfBirth(new java.util.Date(sqlDate.getTime()));
+            } else {
+                employee.setDateOfBirth(null);
+            }
+        } catch (SQLException e) {
+            // Column doesn't exist, set to null
+            employee.setDateOfBirth(null);
         }
         return employee;
     }

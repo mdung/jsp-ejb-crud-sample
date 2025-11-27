@@ -116,7 +116,9 @@
         <h:messages globalOnly="true" infoClass="message" errorClass="message error"/>
         
         <h:form>
-            <h:commandLink value="Add New Employee" action="#{employeeBean.showNewForm}" 
+            <!-- Gọi bean để chuẩn bị form Add (RequestScoped) -->
+            <h:commandLink value="Add New Employee"
+                           action="#{employeeBean.showNewForm}"
                            styleClass="btn btn-primary"/>
         </h:form>
         
@@ -157,6 +159,12 @@
                 </h:column>
                 <h:column>
                     <f:facet name="header">
+                        <h:outputText value="First Name" style="color: white; font-weight: bold;"/>
+                    </f:facet>
+                    <h:outputText value="#{employee.firstName}"/>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">
                         <h:commandLink value="Name" action="#{employeeBean.sortEmployees}" 
                                       style="color: white; text-decoration: none; font-weight: bold;">
                             <f:param name="column" value="name"/>
@@ -187,6 +195,13 @@
                                      style="color: white;"/>
                     </f:facet>
                     <h:outputText value="#{employee.department}"/>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Date of Birth</f:facet>
+                    <h:outputText value="#{employee.dateOfBirth}">
+                        <f:convertDateTime pattern="yyyy-MM-dd"/>
+                    </h:outputText>
+                    <h:outputText value="N/A" rendered="#{empty employee.dateOfBirth}"/>
                 </h:column>
                 <h:column>
                     <f:facet name="header">Status</f:facet>

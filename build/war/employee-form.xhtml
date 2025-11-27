@@ -4,7 +4,8 @@
       xmlns:f="http://xmlns.jcp.org/jsf/core">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <title>#{employeeBean.action == 'update' ? 'Edit Employee' : 'Add New Employee'}</title>
+    <!-- Dựa vào employee.id để phân biệt Add / Edit -->
+    <title>#{empty employeeBean.employee.id ? 'Add New Employee' : 'Edit Employee'}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -61,14 +62,20 @@
 </head>
 <body>
     <div class="container">
-        <h1>#{employeeBean.action == 'update' ? 'Edit Employee' : 'Add New Employee'}</h1>
+        <h1>#{empty employeeBean.employee.id ? 'Add New Employee' : 'Edit Employee'}</h1>
         
-        <h:messages globalOnly="true" errorClass="error" infoClass="message"/>
+        <!-- Show all messages (field + global) -->
+        <h:messages globalOnly="false" errorClass="error" infoClass="message"/>
         
-        <h:panelGroup rendered="#{not empty employeeBean.employee}">
             <h:form id="employeeForm">
-                <h:inputHidden id="action" value="#{employeeBean.action}"/>
+                <!-- Giữ lại ID khi edit để RequestScoped bean nhận được trên submit -->
                 <h:inputHidden id="employeeId" value="#{employeeBean.employee.id}"/>
+                <div class="form-group">
+                    <h:outputLabel for="firstName" value="First Name" styleClass="label"/>
+                    <h:inputText id="firstName" value="#{employeeBean.employee.firstName}" 
+                                maxlength="50" style="width: 100%; padding: 10px;"/>
+                    <h:message for="firstName" styleClass="error"/>
+                </div>
                 
                 <div class="form-group">
                     <h:outputLabel for="name" value="Name *" styleClass="label"/>
@@ -86,16 +93,34 @@
                     <h:message for="email" styleClass="error"/>
                 </div>
                 
-                <div class="form-group">
-                    <h:outputLabel for="department" value="Department *" styleClass="label"/>
-                    <h:inputText id="department" value="#{employeeBean.employee.department}" 
-                                required="true" requiredMessage="Department is required"
-                                maxlength="50" style="width: 100%; padding: 10px;"/>
-                    <h:message for="department" styleClass="error"/>
-                </div>
+            <div class="form-group">
+                <h:outputLabel for="department" value="Department *" styleClass="label"/>
+                <h:inputText id="department" value="#{employeeBean.employee.department}" 
+                            required="true" requiredMessage="Department is required"
+                            maxlength="50" style="width: 100%; padding: 10px;"/>
+                <h:message for="department" styleClass="error"/>
+            </div>
+            
+            <div class="form-group">
+                <h:outputLabel for="dateOfBirth" value="Date of Birth (YYYY-MM-DD)" styleClass="label"/>
+                <h:inputText id="dateOfBirth" value="#{employeeBean.employee.dateOfBirth}" 
+                            style="width: 100%; padding: 10px;"
+                            placeholder="YYYY-MM-DD">
+                    <f:convertDateTime pattern="yyyy-MM-dd"/>
+                </h:inputText>
+                <h:message for="dateOfBirth" styleClass="error"/>
+            </div>
+            
+            <div class="form-group">
+                <h:outputLabel for="active" value="Status" styleClass="label"/>
+                <h:selectBooleanCheckbox id="active" value="#{employeeBean.employee.active}" 
+                                         style="margin-left: 10px;"/>
+                <h:outputText value="Active" style="margin-left: 5px;"/>
+                <h:message for="active" styleClass="error"/>
+            </div>
             
                 <div class="form-group">
-                    <h:commandButton value="#{employeeBean.action == 'update' ? 'Update Employee' : 'Create Employee'}" 
+                    <h:commandButton value="#{empty employeeBean.employee.id ? 'Create Employee' : 'Update Employee'}" 
                                    action="#{employeeBean.submitForm}"
                                    styleClass="btn btn-primary"/>
                     <h:commandLink value="Cancel" action="employee-list?faces-redirect=true" 
@@ -103,15 +128,6 @@
                                   immediate="true"/>
                 </div>
             </h:form>
-        </h:panelGroup>
-        
-        <h:panelGroup rendered="#{empty employeeBean.employee}">
-            <p>Loading form...</p>
-            <h:form>
-                <h:commandLink value="Back to List" action="employee-list?faces-redirect=true" 
-                              styleClass="btn btn-secondary"/>
-            </h:form>
-        </h:panelGroup>
     </div>
 </body>
 </html>

@@ -73,6 +73,11 @@
             </div>
             
             <div class="detail-group">
+                <div class="detail-label">First Name</div>
+                <div class="detail-value">#{employeeBean.employee.firstName}</div>
+            </div>
+            
+            <div class="detail-group">
                 <div class="detail-label">Name</div>
                 <div class="detail-value">#{employeeBean.employee.name}</div>
             </div>
@@ -85,6 +90,16 @@
             <div class="detail-group">
                 <div class="detail-label">Department</div>
                 <div class="detail-value">#{employeeBean.employee.department}</div>
+            </div>
+            
+            <div class="detail-group">
+                <div class="detail-label">Date of Birth</div>
+                <div class="detail-value">
+                    <h:outputText value="#{employeeBean.employee.dateOfBirth}">
+                        <f:convertDateTime pattern="yyyy-MM-dd"/>
+                    </h:outputText>
+                    <h:outputText value="N/A" rendered="#{empty employeeBean.employee.dateOfBirth}"/>
+                </div>
             </div>
             
             <div class="detail-group">
@@ -129,7 +144,7 @@
                         <f:param name="id" value="#{employeeBean.employeeId}"/>
                     </h:commandLink>
                     <h:commandLink value="Back to List" 
-                                   action="employee-list?faces-redirect=true"
+                                   action="list"
                                    styleClass="btn btn-back"/>
                 </div>
             </h:form>
@@ -139,7 +154,7 @@
             <p>Employee not found.</p>
             <h:form>
                 <h:commandLink value="Back to List" 
-                               action="employee-list?faces-redirect=true"
+                               action="list"
                                styleClass="btn btn-back"/>
             </h:form>
         </h:panelGroup>
