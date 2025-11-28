@@ -307,6 +307,16 @@ public class EmployeeBean {
                 return null;
             }
             
+            // Validate date of birth if provided
+            if (employee.getDateOfBirth() != null) {
+                java.util.Date today = new java.util.Date();
+                if (employee.getDateOfBirth().after(today)) {
+                    addErrorMessage("Date of Birth cannot be in the future. Please select a valid date.");
+                    LOGGER.warning("submitForm aborted: date of birth is in the future");
+                    return null;
+                }
+            }
+            
             // Nếu có id → update, ngược lại → create
             if (employee.getId() != null) {
                 LOGGER.info("submitForm detected UPDATE, employee.id=" + employee.getId());
@@ -467,8 +477,34 @@ public class EmployeeBean {
                 return null;
             }
             if (month == null || month.trim().isEmpty()) {
-                addErrorMessage("Month is required");
+                addErrorMessage("Month is required. Please select a month.");
                 return null;
+            }
+            
+            // Validate month format (YYYY-MM)
+            if (!month.matches("\\d{4}-\\d{2}")) {
+                addErrorMessage("Invalid month format. Please select a valid month (YYYY-MM).");
+                return null;
+            }
+            
+            // Validate month range (01-12)
+            String[] parts = month.split("-");
+            if (parts.length == 2) {
+                try {
+                    int year = Integer.parseInt(parts[0]);
+                    int monthNum = Integer.parseInt(parts[1]);
+                    if (monthNum < 1 || monthNum > 12) {
+                        addErrorMessage("Invalid month. Month must be between 01 and 12.");
+                        return null;
+                    }
+                    if (year < 2000 || year > 2100) {
+                        addErrorMessage("Invalid year. Year must be between 2000 and 2100.");
+                        return null;
+                    }
+                } catch (NumberFormatException e) {
+                    addErrorMessage("Invalid month format. Please select a valid month.");
+                    return null;
+                }
             }
             if (performanceScore == null) {
                 addErrorMessage("Performance score is required");
@@ -730,5 +766,14 @@ public class EmployeeBean {
     
     public void setSortOrder(String sortOrder) {
         this.sortOrder = sortOrder;
+    }
+    
+    /**
+     * Get max date for date of birth (today's date)
+     * Used in datepicker to prevent selecting future dates
+     */
+    public String getMaxDateOfBirth() {
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(new java.util.Date());
     }
 }

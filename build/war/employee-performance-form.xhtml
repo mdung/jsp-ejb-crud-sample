@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:f="http://xmlns.jcp.org/jsf/core">
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title>Employee Performance</title>
@@ -64,6 +65,31 @@
         .btn-cancel:hover {
             background-color: #5a6268;
         }
+        .error {
+            color: red;
+            font-size: 12px;
+            display: block;
+            margin-top: 5px;
+        }
+        .error-message {
+            color: red;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        small {
+            color: #666;
+            font-size: 12px;
+        }
+        input[type="month"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        input[type="month"]:invalid {
+            border-color: #f44336;
+        }
     </style>
 </head>
 <body>
@@ -84,14 +110,14 @@
             <h:inputHidden id="employeeIdFromEmployee" value="#{employeeBean.employee.id}"/>
             
             <div class="form-group">
-                <h:outputLabel for="month" value="Month (YYYY-MM):"/>
+                <h:outputLabel for="month" value="Month *" styleClass="label"/>
                 <h:inputText id="month" value="#{employeeBean.month}" 
-                            required="true" requiredMessage="Month is required"
-                            pattern="\\d{4}-\\d{2}" 
-                            placeholder="2025-11"
+                            required="true" 
+                            requiredMessage="Month is required. Please select a month."
+                            pt:type="month"
                             style="width: 100%; padding: 8px;"/>
-                <h:message for="month" styleClass="error"/>
-                <small style="color: #666;">Format: YYYY-MM (e.g., 2025-11)</small>
+                <h:message for="month" styleClass="error" style="color: red; font-size: 12px; display: block; margin-top: 5px;"/>
+                <small style="color: #666; font-size: 12px;">Select year and month (e.g., November 2025)</small>
             </div>
             
             <div class="form-group">

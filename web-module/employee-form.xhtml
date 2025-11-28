@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:f="http://xmlns.jcp.org/jsf/core">
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <!-- Dựa vào employee.id để phân biệt Add / Edit -->
@@ -58,6 +59,41 @@
         .btn-secondary:hover {
             background-color: #5a6268;
         }
+        .error {
+            color: red;
+            font-size: 12px;
+            display: block;
+            margin-top: 5px;
+        }
+        .error-message {
+            color: red;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        small {
+            color: #666;
+            font-size: 12px;
+        }
+        input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        input[type="date"]:invalid {
+            border-color: #f44336;
+        }
+        input[type="month"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        input[type="month"]:invalid {
+            border-color: #f44336;
+        }
     </style>
 </head>
 <body>
@@ -102,13 +138,16 @@
             </div>
             
             <div class="form-group">
-                <h:outputLabel for="dateOfBirth" value="Date of Birth (YYYY-MM-DD)" styleClass="label"/>
+                <h:outputLabel for="dateOfBirth" value="Date of Birth" styleClass="label"/>
                 <h:inputText id="dateOfBirth" value="#{employeeBean.employee.dateOfBirth}" 
                             style="width: 100%; padding: 10px;"
-                            placeholder="YYYY-MM-DD">
-                    <f:convertDateTime pattern="yyyy-MM-dd"/>
+                            pt:type="date"
+                            pt:max="#{employeeBean.maxDateOfBirth}">
+                    <f:convertDateTime pattern="yyyy-MM-dd" type="date"/>
+                    <f:validateRequired required="false"/>
                 </h:inputText>
-                <h:message for="dateOfBirth" styleClass="error"/>
+                <h:message for="dateOfBirth" styleClass="error" style="color: red; font-size: 12px; display: block; margin-top: 5px;"/>
+                <small style="color: #666; font-size: 12px;">Select a date. Must not be in the future.</small>
             </div>
             
             <div class="form-group">
